@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "node --test tests/static.test.mjs tests/hero-image.test.mjs",
+    "test": "node --test tests/static.test.mjs tests/hero-image.test.mjs tests/auth.test.mjs",
     "test:http": "node tests/http.mjs",
     "test:db": "psql -X -v ON_ERROR_STOP=1 -f tests/database.sql && node tests/concurrency.mjs",
     "format": "prettier --write src tests scripts next.config.ts README.md"

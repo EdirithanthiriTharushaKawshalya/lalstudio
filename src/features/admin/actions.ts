@@ -8,6 +8,12 @@ import { localTimestamp, studioDefaults } from "@/lib/studio";
 import { allowedUrl, rateLimit } from "@/lib/security";
 import { uploadImage, removeUnusedPublicFile } from "@/lib/storage";
 import type { ActionState } from "@/components/ui/form";
+import { loginSchema } from "@/features/auth/schema.mts";
+import {
+  backend,
+  isHosted,
+  authConfigurationIssues,
+} from "@/lib/supabase-configuration";
 function message(e: unknown) {
   return {
     error:
@@ -24,23 +30,38 @@ export async function login(
 ): Promise<ActionState> {
   if (!live)
     return {
-      error:
-        "Connect Supabase to enable staff sign-in. The sample admin preview is read-only.",
+      error: isHosted
+        ? `Staff sign-in is not configured on this deployment. Add the Production environment variables ${backend.missing.join(", ")} in Vercel and redeploy.`
+        : "Connect Supabase to enable staff sign-in. The sample admin preview is read-only.",
     };
   try {
+    const p = loginSchema.parse(Object.fromEntries(form));
+    if (authConfigurationIssues.length)
+      return {
+        error: `Staff sign-in setup is incomplete. Configure ${authConfigurationIssues.join(", ")} in the deployment environment and redeploy.`,
+      };
     await rateLimit("login", 8);
-    const p = z
-      .object({ email: z.email(), password: z.string().min(8).max(200) })
-      .parse(Object.fromEntries(form));
-    const auth = await authClient();
+    const auth = await authClient(true);
     const { data, error } = await auth.auth.signInWithPassword(p);
+    if (error?.code === "email_not_confirmed")
+      return {
+        error:
+          "Confirm your staff email in Supabase Authentication before signing in.",
+      };
     if (error || !data.user)
       return { error: "Sign-in failed. Check your staff credentials." };
-    const { data: staff } = await database()
+    const { data: staff, error: staffError } = await database()
       .from("admins")
       .select("user_id")
       .eq("user_id", data.user.id)
       .maybeSingle();
+    if (staffError) {
+      await auth.auth.signOut();
+      return {
+        error:
+          "Signed in, but staff permissions could not be verified. Check the deployment’s Supabase server key and database setup.",
+      };
+    }
     if (!staff) {
       await auth.auth.signOut();
       return {
@@ -50,10 +71,11 @@ export async function login(
   } catch (e) {
     return message(e);
   }
+  revalidatePath("/admin", "layout");
   redirect("/admin");
 }
 export async function logout() {
-  if (live) await (await authClient()).auth.signOut();
+  if (live) await (await authClient(true)).auth.signOut();
   redirect("/admin/login");
 }
 export async function saveRecord(

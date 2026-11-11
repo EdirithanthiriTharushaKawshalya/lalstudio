@@ -29,6 +29,9 @@ export function PublicFooter({ studio }: { studio: StudioSettings }) {
           <Link href="/event-gallery">
             Event Gallery <ArrowUpRight size={14} />
           </Link>
+          <Link href="/admin/login">
+            Admin sign in <ArrowUpRight size={14} />
+          </Link>
           {studio.social_facebook && (
             <a href={studio.social_facebook} target="_blank" rel="noreferrer">
               Facebook ↗
@@ -47,7 +50,6 @@ export function PublicFooter({ studio }: { studio: StudioSettings }) {
         </span>
         <div>
           <Link href="/privacy">Privacy</Link>
-          <Link href="/admin/login">Studio login</Link>
           <span>Made for the memories.</span>
         </div>
       </div>

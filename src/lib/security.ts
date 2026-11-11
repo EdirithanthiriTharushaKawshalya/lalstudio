@@ -2,6 +2,8 @@ import "server-only";
 import { createHmac } from "node:crypto";
 import { headers } from "next/headers";
 import { database } from "./supabase";
+import { backend } from "./supabase-configuration";
+import { rateLimitKey } from "./rate-limit-key.mts";
 export function signature(value: string) {
   if (!process.env.APP_SECRET || process.env.APP_SECRET.length < 32)
     throw new Error(
@@ -18,11 +20,17 @@ export async function rateLimit(scope: string, max = 5, seconds = 900) {
     h.get("x-forwarded-for")?.split(",")[0]?.trim() ||
     "unknown";
   const { data, error } = await database().rpc("consume_rate", {
-    k: signature(`${scope}:${ip}`),
+    k: rateLimitKey(scope, ip, backend.secretKey),
     max_attempts: max,
     seconds,
   });
-  if (error || !data)
+  if (error)
+    throw new Error(
+      scope === "login"
+        ? "Sign-in service is unavailable. Check this deployment’s Supabase server key and database setup."
+        : "The studio service is temporarily unavailable. Please try again later.",
+    );
+  if (!data)
     throw new Error(
       "Too many attempts. Please wait a little before trying again.",
     );

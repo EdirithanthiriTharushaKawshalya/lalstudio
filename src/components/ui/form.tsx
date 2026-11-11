@@ -76,6 +76,7 @@ export function Field({
   min,
   max,
   step,
+  autoComplete,
 }: {
   label: string;
   name: string;
@@ -88,6 +89,7 @@ export function Field({
   min?: string | number;
   max?: string | number;
   step?: string;
+  autoComplete?: string;
 }) {
   return (
     <label className="field">
@@ -119,6 +121,7 @@ export function Field({
         <input
           name={name}
           type={type}
+          autoComplete={autoComplete}
           defaultValue={type === "file" ? undefined : value}
           required={required}
           min={min}

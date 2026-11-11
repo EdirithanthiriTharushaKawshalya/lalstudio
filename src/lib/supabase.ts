@@ -4,45 +4,48 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-export const live = Boolean(
-  process.env.NEXT_PUBLIC_SUPABASE_URL &&
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
-);
+import {
+  backend,
+  isHosted,
+  sessionCookieOptions,
+} from "./supabase-configuration";
+export const live = backend.configured;
 export function database() {
   if (!live)
     throw new Error("Sample preview: connect Supabase to save records.");
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient(backend.url, backend.secretKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
-export async function authClient() {
+export async function authClient(writeCookies = false) {
   const jar = await cookies();
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => jar.getAll(),
-        setAll: (values) => {
-          try {
-            values.forEach(({ name, value, options }) =>
-              jar.set(name, value, options),
-            );
-          } catch {
-            /* refreshed by the auth action */
-          }
-        },
+  return createServerClient(backend.url, backend.publishableKey, {
+    cookieOptions: sessionCookieOptions,
+    cookies: {
+      getAll: () => jar.getAll(),
+      setAll: (values) => {
+        if (writeCookies) {
+          values.forEach(({ name, value, options }) =>
+            jar.set(name, value, options),
+          );
+          return;
+        }
+        try {
+          values.forEach(({ name, value, options }) =>
+            jar.set(name, value, options),
+          );
+        } catch {
+          /* Server Components are read-only. Proxy persists refreshed cookies. */
+        }
       },
     },
-  );
+  });
 }
 async function verifyAdmin(allowPreview = false) {
   if (!live) {
-    if (allowPreview)
+    if (allowPreview && !isHosted)
       return { id: "preview", email: "Read-only sample preview" };
+    if (isHosted) redirect("/admin/login?error=configuration");
     throw new Error("Preview is read-only. Configure Supabase first.");
   }
   const client = await authClient();
