@@ -12,7 +12,7 @@ export const studioDefaults = {
   hero_image: "",
   hero_image_key: "",
   hero_image_alt:
-    "A wedding celebration, photographed in timeless black and white",
+    "AI-edited illustrative Sri Lankan bridal portrait beside a staircase in soft black and white",
   timezone: "Asia/Colombo",
   currency: "LKR",
   social_facebook: "",
