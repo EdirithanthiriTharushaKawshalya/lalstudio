@@ -57,7 +57,6 @@ export const photos = {
   event: "/photos/event.jpg",
   camera: "/photos/camera.jpg",
   printing: "/photos/printing-framing.webp",
-  about: "/photos/Archival cream paper flyer cutout copy.jpg",
 };
 export type Row = {
   id: string;

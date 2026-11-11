@@ -811,20 +811,10 @@ svg {
   border-radius: 50%;
 }
 .about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 90px;
-  align-items: start;
+  max-width: 760px;
 }
-.about-image {
-  position: relative;
-  height: auto;
-}
-.about-archive-photo {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
+.about-grid .prose > h2:first-child {
+  margin-top: 0;
 }
 .prose p {
   font-size: 14px;
@@ -1809,9 +1799,6 @@ tr:hover td {
     padding: 11px 15px;
     gap: 10px;
   }
-  .about-grid {
-    gap: 45px;
-  }
   .service-name h3 {
     font-size: 13px;
   }
@@ -1960,9 +1947,6 @@ tr:hover td {
   .service-list-row > .circle-link {
     grid-column: 3;
     grid-row: 1;
-  }
-  .about-grid {
-    gap: 35px;
   }
   .about-grid h2 {
     font-size: 29px;
@@ -2411,10 +2395,6 @@ tr:hover td {
   }
   .circle-link svg {
     width: 18px;
-  }
-  .about-grid {
-    grid-template-columns: 1fr;
-    gap: 25px;
   }
   .about-grid h2 {
     font-size: 34px;

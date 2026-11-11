@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { settings } from "@/lib/data";
-import { photos } from "@/lib/studio";
 export const metadata: Metadata = { title: "Our story & contact" };
 export default async function About() {
   const s = await settings();
@@ -15,16 +13,6 @@ export default async function About() {
         Part of your memories.
       </h1>
       <div className="about-grid">
-        <div className="about-image">
-          <Image
-            src={photos.about}
-            alt="Archival LAL STUDIO flyer with red Sinhala lettering on cream paper"
-            width={885}
-            height={1313}
-            sizes="(max-width: 600px) calc(100vw - 36px), (max-width: 1100px) 45vw, 515px"
-            className="about-archive-photo"
-          />
-        </div>
         <div className="prose">
           <h2>
             A familiar place.
