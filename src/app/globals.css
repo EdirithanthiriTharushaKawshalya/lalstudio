@@ -818,8 +818,13 @@ svg {
 }
 .about-image {
   position: relative;
-  height: 650px;
-  filter: grayscale(1);
+  height: auto;
+}
+.about-archive-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
 }
 .prose p {
   font-size: 14px;
@@ -1956,9 +1961,6 @@ tr:hover td {
     grid-column: 3;
     grid-row: 1;
   }
-  .about-image {
-    height: 550px;
-  }
   .about-grid {
     gap: 35px;
   }
@@ -2413,9 +2415,6 @@ tr:hover td {
   .about-grid {
     grid-template-columns: 1fr;
     gap: 25px;
-  }
-  .about-image {
-    height: 430px;
   }
   .about-grid h2 {
     font-size: 34px;

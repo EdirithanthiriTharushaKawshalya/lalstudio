@@ -17,10 +17,12 @@ export default async function About() {
       <div className="about-grid">
         <div className="about-image">
           <Image
-            src={photos.portrait}
-            alt="Illustrative portrait in natural light"
-            fill
-            sizes="50vw"
+            src={photos.about}
+            alt="Archival LAL STUDIO flyer with red Sinhala lettering on cream paper"
+            width={885}
+            height={1313}
+            sizes="(max-width: 600px) calc(100vw - 36px), (max-width: 1100px) 45vw, 515px"
+            className="about-archive-photo"
           />
         </div>
         <div className="prose">
