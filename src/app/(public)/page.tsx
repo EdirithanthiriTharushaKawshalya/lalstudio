@@ -80,9 +80,9 @@ export default async function Home() {
             <div className="collage-main">
               <Image
                 src={photos.portrait}
-                alt="Illustrative studio portrait"
+                alt="AI-generated sample studio portrait of a Sri Lankan woman"
                 fill
-                sizes="45vw"
+                sizes="(max-width: 600px) 78vw, 45vw"
               />
             </div>
             <div className="collage-small">

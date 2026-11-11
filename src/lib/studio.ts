@@ -51,7 +51,7 @@ export const rentalStatuses = [
 export const photos = {
   hero: "/photos/hero-celebration.jpg",
   wedding: "/photos/wedding.jpg",
-  portrait: "/photos/portrait.jpg",
+  portrait: "/photos/sri-lankan-portrait.webp",
   family: "/photos/family.jpg",
   couple: "/photos/couple.jpg",
   event: "/photos/event.jpg",
