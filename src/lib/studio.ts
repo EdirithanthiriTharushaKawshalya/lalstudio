@@ -56,6 +56,7 @@ export const photos = {
   couple: "/photos/couple.jpg",
   event: "/photos/event.jpg",
   camera: "/photos/camera.jpg",
+  printing: "/photos/printing-framing.webp",
 };
 export type Row = {
   id: string;

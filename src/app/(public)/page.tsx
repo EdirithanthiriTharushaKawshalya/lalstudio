@@ -194,7 +194,7 @@ export default async function Home() {
             ],
             [
               "Printing & framing",
-              photos.portrait,
+              photos.printing,
               "Made to hold, hang and treasure.",
               "/services",
             ],
