@@ -23,6 +23,20 @@
 * {
   box-sizing: border-box;
 }
+/* Keep the document on the viewport; wide tables/calendars scroll inside their regions.
+   Unlike hidden, clip does not create a scroll container or break sticky sections. */
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+@supports not (overflow-x: clip) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 30px;
@@ -2732,7 +2746,7 @@ tr:hover td {
   }
 }
 
-/* Contain long content without hiding page overflow. Tables and calendars scroll locally. */
+/* Keep long content within its layout. Tables and calendars scroll locally. */
 .section > *,
 .story-grid > *,
 .about-grid > *,
