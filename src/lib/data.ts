@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { database, live, requireAdmin } from "./supabase";
 import {
   studioDefaults,
@@ -9,17 +10,23 @@ import {
   type StudioSettings,
   type Row,
 } from "./studio";
-export const settings = cache(async (): Promise<StudioSettings> => {
-  if (!live) return studioDefaults;
-  const { data, error } = await database()
-    .from("settings")
-    .select("value")
-    .eq("id", "studio")
-    .single();
-  if (error)
-    throw new Error("Studio settings are unavailable. Please try again.");
-  return { ...studioDefaults, ...data.value };
-});
+const cachedSettings = unstable_cache(
+  async (): Promise<StudioSettings> => {
+    const { data, error } = await database()
+      .from("settings")
+      .select("value")
+      .eq("id", "studio")
+      .single();
+    if (error)
+      throw new Error("Studio settings are unavailable. Please try again.");
+    return { ...studioDefaults, ...data.value };
+  },
+  ["studio-settings"],
+  { tags: ["studio-settings"], revalidate: 300 },
+);
+export const settings = cache(async (): Promise<StudioSettings> =>
+  live ? cachedSettings() : studioDefaults,
+);
 export async function publicRows(
   table: "portfolio" | "equipment" | "services",
 ): Promise<Row[]> {
@@ -33,15 +40,23 @@ export async function publicRows(
             published: true,
           }))
         : sampleEquipment;
-  const { data, error } = await database()
-    .from(table)
-    .select("*")
-    .eq("published", true)
-    .order(table === "equipment" ? "name" : "sort_order");
-  if (error) throw new Error("This collection is temporarily unavailable.");
-  return data ?? [];
+  return cachedPublicRows(table);
 }
-export async function adminRows(table: string): Promise<Row[]> {
+// Only published catalog data is shared across requests. Private records stay uncached.
+const cachedPublicRows = unstable_cache(
+  async (table: "portfolio" | "equipment" | "services"): Promise<Row[]> => {
+    const { data, error } = await database()
+      .from(table)
+      .select("*")
+      .eq("published", true)
+      .order(table === "equipment" ? "name" : "sort_order");
+    if (error) throw new Error("This collection is temporarily unavailable.");
+    return data ?? [];
+  },
+  ["public-catalog"],
+  { tags: ["public-catalog"], revalidate: 300 },
+);
+export const adminRows = cache(async (table: string): Promise<Row[]> => {
   await requireAdmin(true);
   if (!live)
     return table === "portfolio"
@@ -66,4 +81,4 @@ export async function adminRows(table: string): Promise<Row[]> {
     if (!data || data.length < 500) break;
   }
   return rows;
-}
+});

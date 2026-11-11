@@ -1,6 +1,6 @@
 "use server";
 import { z } from "zod";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { database, requireAdmin, authClient, live } from "@/lib/supabase";
 import { sections } from "./config";
@@ -275,6 +275,8 @@ export async function saveRecord(
       if (!refError && !refs?.length)
         await db.storage.from("gallery-covers").remove([previous.cover_key]);
     }
+    if (["portfolio", "equipment", "services"].includes(section))
+      updateTag("public-catalog");
     revalidatePath("/", "layout");
     return { success: "Saved. Your records and related views are up to date." };
   } catch (e) {
@@ -314,6 +316,8 @@ export async function deleteRecord(
     if (old?.thumbnail_key) await removeUnusedPublicFile(old.thumbnail_key);
     if (old?.cover_key)
       await db.storage.from("gallery-covers").remove([old.cover_key]);
+    if (["portfolio", "equipment"].includes(section))
+      updateTag("public-catalog");
     revalidatePath("/", "layout");
     return { success: "Record deleted." };
   } catch (e) {
@@ -464,6 +468,7 @@ export async function saveSettings(
       previousKey
     )
       await removeUnusedPublicFile(previousKey);
+    updateTag("studio-settings");
     revalidatePath("/", "layout");
     return { success: "Studio settings saved across the website." };
   } catch (e) {

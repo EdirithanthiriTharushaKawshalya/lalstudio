@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useDeferredValue, useState } from "react";
 import { Search, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { dateTime, money, type Row } from "@/lib/studio";
@@ -18,10 +18,16 @@ export function RecordsTable({
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
+  const query = useDeferredValue(search.trim().toLowerCase());
   const filtered = rows.filter(
     (r) =>
       (!status || r.status === status) &&
-      JSON.stringify(r).toLowerCase().includes(search.toLowerCase()),
+      (!query ||
+        Object.values(r).some((value) =>
+          String(value ?? "")
+            .toLowerCase()
+            .includes(query),
+        )),
   );
   return (
     <div className="records-panel">

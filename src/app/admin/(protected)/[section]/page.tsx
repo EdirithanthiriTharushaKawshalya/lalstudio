@@ -156,6 +156,10 @@ export default async function AdminSection({
   const row = q.edit ? rows.find((r) => r.id === q.edit) : undefined;
   if (q.edit && !row) notFound();
   const editing = Boolean(q.new || row);
+  const [calendarBookings, calendarRentals] =
+    section === "calendar" && !editing
+      ? await Promise.all([adminRows("bookings"), adminRows("rentals")])
+      : [[], []];
   const defaults: Row = row ?? {
     id: "",
     ...(q.date
@@ -358,8 +362,8 @@ export default async function AdminSection({
       )}
       {!editing && section === "calendar" && (
         <Calendar
-          bookings={await adminRows("bookings")}
-          rentals={await adminRows("rentals")}
+          bookings={calendarBookings}
+          rentals={calendarRentals}
           manual={rows}
         />
       )}
