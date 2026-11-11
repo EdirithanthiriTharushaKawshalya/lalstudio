@@ -114,6 +114,27 @@ npm.cmd run build
 npm.cmd run test:http
 ```
 
+The Equipment page also has a real Chrome responsive regression check. Start a
+read-only sample preview on port 3001 (without Supabase credentials), then launch
+a disposable headless Chrome instance and run:
+
+```powershell
+$responsiveProfile = Join-Path $env:TEMP 'lalstudio-responsive-chrome'
+Start-Process -FilePath 'C:/Program Files/Google/Chrome/Application/chrome.exe' -WindowStyle Hidden -ArgumentList @('--headless=new', '--remote-debugging-port=9223', ('--user-data-dir="' + $responsiveProfile + '"'), '--no-first-run', 'about:blank')
+npm.cmd run test:responsive
+```
+
+`TEST_SITE_URL` and `CHROME_DEBUG_URL` override the default app and Chrome addresses.
+The test uses Chrome DevTools mobile metrics and touch gestures at 320, 375 and
+430 px, checks swipes inside/outside the table and at its right edge, verifies the
+last column remains reachable and vertical scrolling works, and compares desktop
+geometry at 1024 and 1440 px. Screenshots are saved under `test-results/`.
+It disables root overflow clipping while measuring, so clipping cannot conceal a
+regression. The original defect was the absolutely positioned screen-reader-only
+Action label escaping the static table wrapper: it widened a 320 px document to
+449 px. Positioning `.table-scroll` relatively contains that label without changing
+the desktop layout or clipping table columns.
+
 For database verification, use a **disposable isolated PostgreSQL database**, never production. The bootstrap file creates minimal Supabase `auth`/`storage` test shims; it is not a Supabase replacement. Apply it once, then apply all six migrations. Set the standard `PGHOST`, `PGPORT`, `PGUSER`, `PGDATABASE` variables to that database and run `npm run test:db`. SQL assertions run in a rollback transaction; concurrency checks create uniquely identified fixtures and clean up their records afterward. These tests cover rental allocation and conflicts, released reservations, maintenance, status transitions, staff handover/return timestamps and condition requirements, optional finance independence, stock idempotency/nonnegative balances, exact amounts, payment retries/void audits, gallery passcodes/expiry/revocation/token rotation, rate limits, settings and anonymous RLS. The concurrency script launches independent PostgreSQL connections to race rental approvals and payment retries.
 
 Verified during implementation:
